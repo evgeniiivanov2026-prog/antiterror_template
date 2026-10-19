@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.7/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": {
+      "contentSize": "720px",
+      "wideSize": "1180px"
+    },
+    "color": {
+      "palette": [
+        { "slug": "ink", "color": "#161410", "name": "Чернила" },
+        { "slug": "paper", "color": "#f3efe6", "name": "Бумага" },
+        { "slug": "signal", "color": "#9e2a22", "name": "Сигнал" },
+        { "slug": "card", "color": "#fbfaf7", "name": "Карточка" }
+      ]
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "slug": "serif",
+          "name": "Антиква",
+          "fontFamily": "\"Cormorant Garamond\", Palatino, serif"
+        },
+        {
+          "slug": "sans",
+          "name": "Гротеск",
+          "fontFamily": "Manrope, sans-serif"
+        }
+      ]
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#f3efe6",
+      "text": "#161410"
+    },
+    "typography": {
+      "fontFamily": "Manrope, sans-serif",
+      "fontSize": "1.0625rem",
+      "lineHeight": "1.65"
+    },
+    "elements": {
+      "heading": {
+        "typography": {
+          "fontFamily": "\"Cormorant Garamond\", Palatino, serif",
+          "fontWeight": "500"
+        }
+      },
+      "link": {
+        "color": { "text": "#6f1d17" }
+      }
+    }
+  }
+}
