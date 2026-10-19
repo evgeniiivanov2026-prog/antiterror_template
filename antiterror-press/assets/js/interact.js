@@ -496,6 +496,58 @@
 
   var prefetched = Object.create(null);
   var prefetchCount = 0;
+  function voteWord(count) {
+    var n10 = count % 10;
+    var n100 = count % 100;
+    if (n10 === 1 && n100 !== 11) return "голос";
+    if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return "голоса";
+    return "голосов";
+  }
+
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest ? event.target.closest("[data-vote]") : null;
+    if (!button || button.disabled || !config.vote) return;
+    var id = button.getAttribute("data-vote");
+    var root = button.closest("[data-vote-root]");
+    button.disabled = true;
+    fetch(config.vote, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-WP-Nonce": config.nonce || ""
+      },
+      body: JSON.stringify({ id: parseInt(id, 10) })
+    }).then(function (response) {
+      return response.json().then(function (payload) {
+        return { ok: response.ok, payload: payload || {} };
+      });
+    }).then(function (result) {
+      if (!result.ok || !result.payload.voted) {
+        button.disabled = false;
+        return;
+      }
+      document.querySelectorAll('[data-vote-root="' + id + '"]').forEach(function (box) {
+        var count = box.querySelector("[data-vote-count]");
+        var word = box.querySelector("[data-vote-word]");
+        var control = box.querySelector("[data-vote]");
+        if (count) count.textContent = String(result.payload.votes);
+        if (word) word.textContent = voteWord(result.payload.votes);
+        if (control) {
+          control.disabled = true;
+          control.setAttribute("aria-pressed", "true");
+          control.textContent = control.getAttribute("data-label-on") || "Вы поддержали";
+        }
+        box.classList.remove("is-tick");
+        window.requestAnimationFrame(function () { box.classList.add("is-tick"); });
+      });
+    }).catch(function () {
+      button.disabled = false;
+    });
+    if (root) root.setAttribute("aria-busy", "true");
+  });
+
   document.addEventListener("pointerover", function (event) {
     if (prefetchCount > 24) return;
     var link = event.target.closest ? event.target.closest("a[href]") : null;

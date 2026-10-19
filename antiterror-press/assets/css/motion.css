@@ -78,6 +78,7 @@
   .at-tabs__tab,
   .bpla-filter,
   .to-top,
+  .vote__btn,
   .nav-links a,
   .page-numbers {
     transition:
@@ -90,7 +91,8 @@
   .share__link:active,
   .at-tabs__tab:active,
   .bpla-filter:active,
-  .to-top:active {
+  .to-top:active,
+  .vote__btn:not(:disabled):active {
     transform: scale(0.98);
   }
 

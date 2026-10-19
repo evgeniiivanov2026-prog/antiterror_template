@@ -74,6 +74,7 @@ function at_assets() {
 			'search'  => esc_url_raw( rest_url( 'at/v1/search' ) ),
 			'feed'    => esc_url_raw( rest_url( 'at/v1/feed' ) ),
 			'contact' => esc_url_raw( rest_url( 'at/v1/contact' ) ),
+			'vote'    => esc_url_raw( rest_url( 'at/v1/vote' ) ),
 			'home'    => esc_url_raw( home_url( '/' ) ),
 		)
 	);

@@ -40,6 +40,123 @@ function at_initiative_no( $number ) {
 	return str_pad( (string) max( 1, (int) $number ), 2, '0', STR_PAD_LEFT );
 }
 
+/**
+ * @param int $post_id Initiative ID.
+ * @return int
+ */
+function at_initiative_votes( $post_id ) {
+	return max( 0, (int) get_post_meta( $post_id, '_at_init_votes', true ) );
+}
+
+/**
+ * @param int $number Vote count.
+ * @return string
+ */
+function at_vote_word( $number ) {
+	$label = at_ru_plural( $number, 'голос', 'голоса', 'голосов' );
+	$parts = explode( ' ', $label, 2 );
+	return isset( $parts[1] ) ? $parts[1] : 'голосов';
+}
+
+/**
+ * Voting stays open while the initiative is still being discussed.
+ *
+ * @param int $post_id Initiative ID.
+ * @return bool
+ */
+function at_initiative_voting_open( $post_id ) {
+	$status = (string) get_post_meta( $post_id, '_at_init_status', true );
+	if ( ! $status ) {
+		$status = 'open';
+	}
+	return in_array( $status, array( 'open', 'review' ), true );
+}
+
+/**
+ * @param int $post_id Initiative ID.
+ * @return bool
+ */
+function at_initiative_voted( $post_id ) {
+	$key = 'at_init_vote_' . (int) $post_id;
+	if ( isset( $_COOKIE[ $key ] ) && '1' === $_COOKIE[ $key ] ) {
+		return true;
+	}
+	if ( is_user_logged_in() ) {
+		$voted = get_user_meta( get_current_user_id(), '_at_init_voted', true );
+		if ( is_array( $voted ) && in_array( (int) $post_id, array_map( 'intval', $voted ), true ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Photograph for a card. A featured image wins. The first initiative
+ * falls back to the CC0 file shipped with the theme.
+ *
+ * @param int|WP_Post $post Initiative.
+ * @return array{url:string,width:int,height:int,alt:string,credit:string}|null
+ */
+function at_initiative_portrait( $post ) {
+	$post = get_post( $post );
+	if ( ! $post instanceof WP_Post ) {
+		return null;
+	}
+	$thumb = get_post_thumbnail_id( $post );
+	if ( $thumb ) {
+		$src = wp_get_attachment_image_src( $thumb, 'large' );
+		if ( $src ) {
+			$alt = (string) get_post_meta( $thumb, '_wp_attachment_image_alt', true );
+			return array(
+				'url'    => $src[0],
+				'width'  => (int) $src[1],
+				'height' => (int) $src[2],
+				'alt'    => $alt ? $alt : get_the_title( $post ),
+				'credit' => (string) wp_get_attachment_caption( $thumb ),
+			);
+		}
+	}
+	if ( 'pamyatnik-dzerzhinskomu' !== $post->post_name ) {
+		return null;
+	}
+	$file = get_template_directory() . '/assets/images/dzerzhinsky.jpg';
+	if ( ! file_exists( $file ) ) {
+		return null;
+	}
+	return array(
+		'url'    => get_template_directory_uri() . '/assets/images/dzerzhinsky.jpg',
+		'width'  => 989,
+		'height' => 1280,
+		'alt'    => 'Памятник Ф. Э. Дзержинскому в парке «Музеон». До 1991 года он стоял на Лубянской площади.',
+		'credit' => 'Кирилл (KirillQQ), 2022. CC0.',
+	);
+}
+
+/**
+ * @param int  $post_id Initiative ID.
+ * @param bool $compact Shorter control for a list row.
+ */
+function at_vote_markup( $post_id, $compact = false ) {
+	$post_id = (int) $post_id;
+	$votes   = at_initiative_votes( $post_id );
+	$voted   = at_initiative_voted( $post_id );
+	$open    = at_initiative_voting_open( $post_id );
+	$label   = $voted ? 'Вы поддержали' : 'Поддержать';
+	if ( ! $open ) {
+		$label = 'Голосование закрыто';
+	}
+	echo '<div class="vote' . ( $compact ? ' vote--compact' : '' ) . '" data-vote-root="' . esc_attr( (string) $post_id ) . '">';
+	echo '<p class="vote__count"><span data-vote-count>' . esc_html( (string) $votes ) . '</span> <span data-vote-word>' . esc_html( at_vote_word( $votes ) ) . '</span></p>';
+	printf(
+		'<button class="vote__btn" type="button" data-vote="%1$d" data-label-on="Вы поддержали" data-label-off="Поддержать" aria-pressed="%2$s"%3$s>%4$s</button>',
+		$post_id,
+		$voted ? 'true' : 'false',
+		( ! $open || $voted ) ? ' disabled' : '',
+		esc_html( $label )
+	);
+	echo '</div>';
+}
+
 function at_register_initiatives() {
 	register_post_type(
 		'at_initiative',
@@ -107,7 +224,15 @@ function at_render_initiative_meta_box( $post ) {
 			Показывать на главной
 		</label>
 	</p>
-	<p class="description">Заголовок, анонс и текст — в редакторе. Порядок на странице фонда задаётся полем «Порядок» в атрибутах страницы.</p>
+	<p>Голосов сейчас: <strong><?php echo esc_html( (string) at_initiative_votes( $post->ID ) ); ?></strong></p>
+	<p>
+		<label>
+			<input type="checkbox" name="at_init_votes_edit" value="1">
+			Заменить число голосов
+		</label><br>
+		<input type="number" class="small-text" name="at_init_votes" min="0" value="<?php echo esc_attr( (string) at_initiative_votes( $post->ID ) ); ?>">
+	</p>
+	<p class="description">Заголовок, анонс, текст и снимок — в редакторе. Миниатюра записи заменяет фотографию на карточке. Порядок задаётся полем «Порядок».</p>
 	<?php
 }
 
@@ -138,6 +263,10 @@ function at_save_initiative_meta( $post_id ) {
 		delete_post_meta( $post_id, '_at_init_place' );
 	}
 	update_post_meta( $post_id, '_at_init_home', empty( $_POST['at_init_home'] ) ? '0' : '1' );
+	if ( ! empty( $_POST['at_init_votes_edit'] ) ) {
+		$votes = isset( $_POST['at_init_votes'] ) ? absint( wp_unslash( $_POST['at_init_votes'] ) ) : 0;
+		update_post_meta( $post_id, '_at_init_votes', $votes );
+	}
 }
 add_action( 'save_post_at_initiative', 'at_save_initiative_meta' );
 
@@ -235,6 +364,7 @@ function at_initiative_columns( $columns ) {
 	$columns['at_status'] = 'Статус';
 	$columns['at_place']  = 'Место';
 	$columns['at_home']   = 'На главной';
+	$columns['at_votes']  = 'Голоса';
 	return $columns;
 }
 add_filter( 'manage_at_initiative_posts_columns', 'at_initiative_columns' );
@@ -252,6 +382,9 @@ function at_initiative_column( $column, $post_id ) {
 	}
 	if ( 'at_home' === $column ) {
 		echo '1' === (string) get_post_meta( $post_id, '_at_init_home', true ) ? 'Да' : '—';
+	}
+	if ( 'at_votes' === $column ) {
+		echo esc_html( (string) at_initiative_votes( $post_id ) );
 	}
 }
 add_action( 'manage_at_initiative_posts_custom_column', 'at_initiative_column', 10, 2 );
@@ -331,6 +464,8 @@ function at_ensure_initiatives() {
 		update_post_meta( $id, '_at_init_status', 'open' );
 		update_post_meta( $id, '_at_init_place', 'Лубянская площадь, Москва' );
 		update_post_meta( $id, '_at_init_home', '1' );
+		update_post_meta( $id, '_at_init_votes', 0 );
+		at_initiative_attach_portrait( $id );
 	}
 
 	if ( ! get_option( 'at_initiatives_rewrite' ) ) {
@@ -340,3 +475,189 @@ function at_ensure_initiatives() {
 	update_option( 'at_initiatives_ready', 1 );
 }
 add_action( 'init', 'at_ensure_initiatives', 20 );
+
+/**
+ * Copy the bundled CC0 photograph into the media library once.
+ *
+ * @param int $post_id Initiative ID.
+ * @return int Attachment ID, or 0.
+ */
+function at_initiative_attach_portrait( $post_id ) {
+	$post_id = (int) $post_id;
+	if ( $post_id < 1 || has_post_thumbnail( $post_id ) ) {
+		return (int) get_post_thumbnail_id( $post_id );
+	}
+	$file = get_template_directory() . '/assets/images/dzerzhinsky.jpg';
+	if ( ! file_exists( $file ) ) {
+		return 0;
+	}
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$tmp = wp_tempnam( 'dzerzhinsky.jpg' );
+	if ( ! $tmp || ! copy( $file, $tmp ) ) {
+		return 0;
+	}
+	$attachment = media_handle_sideload(
+		array(
+			'name'     => 'dzerzhinsky.jpg',
+			'tmp_name' => $tmp,
+		),
+		$post_id,
+		'Памятник Ф. Э. Дзержинскому в парке «Музеон», 2022. Кирилл (KirillQQ), CC0.'
+	);
+	if ( is_wp_error( $attachment ) ) {
+		if ( file_exists( $tmp ) ) {
+			wp_delete_file( $tmp );
+		}
+		return 0;
+	}
+	set_post_thumbnail( $post_id, $attachment );
+	update_post_meta( $attachment, '_wp_attachment_image_alt', 'Памятник Феликсу Дзержинскому. Парк «Музеон», Москва.' );
+	wp_update_post(
+		array(
+			'ID'           => $attachment,
+			'post_excerpt' => 'Кирилл (KirillQQ), 2022. Снимок опубликован на условиях CC0.',
+		)
+	);
+	return (int) $attachment;
+}
+
+/**
+ * Sites that already had the initiative get the photograph on a later load.
+ */
+function at_initiative_maybe_portrait() {
+	if ( get_option( 'at_initiative_portrait' ) || get_transient( 'at_initiative_portrait_try' ) ) {
+		return;
+	}
+	$post = get_page_by_path( 'pamyatnik-dzerzhinskomu', OBJECT, 'at_initiative' );
+	if ( ! $post instanceof WP_Post ) {
+		return;
+	}
+	if ( has_post_thumbnail( $post ) ) {
+		update_option( 'at_initiative_portrait', 1 );
+		return;
+	}
+	set_transient( 'at_initiative_portrait_try', 1, HOUR_IN_SECONDS );
+	$attachment = at_initiative_attach_portrait( $post->ID );
+	if ( $attachment ) {
+		update_option( 'at_initiative_portrait', 1 );
+		delete_transient( 'at_initiative_portrait_try' );
+	}
+}
+add_action( 'init', 'at_initiative_maybe_portrait', 30 );
+
+/**
+ * @param int $post_id Initiative ID.
+ * @return int
+ */
+function at_initiative_add_vote( $post_id ) {
+	$key = '_at_init_votes';
+	if ( '' === get_post_meta( $post_id, $key, true ) && ! metadata_exists( 'post', $post_id, $key ) ) {
+		add_post_meta( $post_id, $key, 1, true );
+		return 1;
+	}
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + 1 WHERE post_id = %d AND meta_key = %s",
+			$post_id,
+			$key
+		)
+	);
+	wp_cache_delete( $post_id, 'post_meta' );
+	return at_initiative_votes( $post_id );
+}
+
+/**
+ * @return bool
+ */
+function at_vote_is_limited() {
+	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0';
+	$key = 'at_vote_ip_' . md5( $ip );
+	$hit = (int) get_transient( $key );
+	if ( $hit >= 30 ) {
+		return true;
+	}
+	set_transient( $key, $hit + 1, HOUR_IN_SECONDS );
+	return false;
+}
+
+/**
+ * @param string $name Cookie name.
+ */
+function at_vote_cookie( $name ) {
+	$args = array(
+		'expires'  => time() + YEAR_IN_SECONDS,
+		'path'     => ( defined( 'COOKIEPATH' ) && COOKIEPATH ) ? COOKIEPATH : '/',
+		'secure'   => is_ssl(),
+		'httponly' => true,
+		'samesite' => 'Lax',
+	);
+	if ( defined( 'COOKIE_DOMAIN' ) && COOKIE_DOMAIN ) {
+		$args['domain'] = COOKIE_DOMAIN;
+	}
+	setcookie( $name, '1', $args );
+	$_COOKIE[ $name ] = '1';
+}
+
+function at_register_vote_route() {
+	register_rest_route(
+		'at/v1',
+		'/vote',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => 'at_rest_nonce_permission',
+			'callback'            => 'at_cast_vote',
+			'args'                => array(
+				'id' => array(
+					'type'     => 'integer',
+					'required' => true,
+				),
+			),
+		)
+	);
+}
+add_action( 'rest_api_init', 'at_register_vote_route' );
+
+/**
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response|WP_Error
+ */
+function at_cast_vote( $request ) {
+	$post_id = (int) $request->get_param( 'id' );
+	$post    = get_post( $post_id );
+	if ( ! $post || 'at_initiative' !== $post->post_type || 'publish' !== $post->post_status ) {
+		return new WP_Error( 'at_vote_missing', 'Initiative not found.', array( 'status' => 404 ) );
+	}
+	if ( ! at_initiative_voting_open( $post_id ) ) {
+		return new WP_Error( 'at_vote_closed', 'Voting is closed.', array( 'status' => 403 ) );
+	}
+	if ( at_initiative_voted( $post_id ) ) {
+		return rest_ensure_response(
+			array(
+				'ok'    => true,
+				'voted' => true,
+				'votes' => at_initiative_votes( $post_id ),
+			)
+		);
+	}
+	if ( at_vote_is_limited() ) {
+		return new WP_Error( 'at_vote_limit', 'Too many votes.', array( 'status' => 429 ) );
+	}
+	$votes = at_initiative_add_vote( $post_id );
+	at_vote_cookie( 'at_init_vote_' . $post_id );
+	if ( is_user_logged_in() ) {
+		$voted   = get_user_meta( get_current_user_id(), '_at_init_voted', true );
+		$voted   = is_array( $voted ) ? $voted : array();
+		$voted[] = $post_id;
+		update_user_meta( get_current_user_id(), '_at_init_voted', array_values( array_unique( array_map( 'intval', $voted ) ) ) );
+	}
+	return rest_ensure_response(
+		array(
+			'ok'    => true,
+			'voted' => true,
+			'votes' => $votes,
+		)
+	);
+}

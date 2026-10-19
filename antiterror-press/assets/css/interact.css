@@ -242,6 +242,55 @@ html.has-js .at-tabs__panel.is-on { display: block; }
 
 .bpla-item { content-visibility: auto; contain-intrinsic-size: auto 72px; }
 
+.vote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.vote__count {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.vote__count [data-vote-word] {
+  margin-left: 4px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.vote__btn {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.vote__btn[aria-pressed="true"],
+.vote__btn:disabled {
+  background: transparent;
+  color: var(--ink);
+  cursor: default;
+}
+.vote__btn:not(:disabled):hover { background: var(--signal-deep); border-color: var(--signal-deep); }
+.vote--compact .vote__count { font-size: 22px; }
+.vote.is-tick .vote__count { animation: at-count 0.45s var(--at-ease-out); }
+@keyframes at-count {
+  from { opacity: 0.35; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
 @media (max-width: 680px) {
   .utility__label { display: none; }
   .siblings { grid-template-columns: 1fr; }

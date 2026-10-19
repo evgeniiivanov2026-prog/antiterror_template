@@ -9,10 +9,11 @@ get_header();
 
 while ( have_posts() ) :
 	the_post();
-	$place    = get_post_meta( get_the_ID(), '_at_init_place', true );
-	$status   = at_initiative_status_label( (string) get_post_meta( get_the_ID(), '_at_init_status', true ) );
-	$is_lead  = (int) get_the_ID() === at_initiative_lead_id();
+	$place     = get_post_meta( get_the_ID(), '_at_init_place', true );
+	$status    = at_initiative_status_label( (string) get_post_meta( get_the_ID(), '_at_init_status', true ) );
+	$is_lead   = (int) get_the_ID() === at_initiative_lead_id();
 	$neighbors = at_initiative_neighbors( get_the_ID() );
+	$portrait  = at_initiative_portrait( get_the_ID() );
 	?>
 <main id="content">
 	<article <?php post_class( 'article-layout wrap' ); ?>>
@@ -31,14 +32,16 @@ while ( have_posts() ) :
 					</ul>
 				<?php endif; ?>
 			</header>
-			<?php if ( has_post_thumbnail() ) : ?>
-				<figure class="article__figure">
-					<?php the_post_thumbnail( 'large', array( 'alt' => esc_attr( get_the_title() ) ) ); ?>
+			<?php if ( $portrait ) : ?>
+				<figure class="article__figure fund-figure">
+					<img src="<?php echo esc_url( $portrait['url'] ); ?>" width="<?php echo esc_attr( (string) $portrait['width'] ); ?>" height="<?php echo esc_attr( (string) $portrait['height'] ); ?>" alt="<?php echo esc_attr( $portrait['alt'] ); ?>">
+					<?php if ( $portrait['credit'] ) : ?><figcaption><?php echo esc_html( $portrait['credit'] ); ?></figcaption><?php endif; ?>
 				</figure>
 			<?php endif; ?>
 			<div class="prose">
 				<?php the_content(); ?>
 			</div>
+			<?php at_vote_markup( get_the_ID() ); ?>
 			<?php at_share_markup(); ?>
 			<?php if ( $neighbors['prev'] || $neighbors['next'] ) : ?>
 				<nav class="siblings" aria-label="Другие инициативы">

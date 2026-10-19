@@ -31,17 +31,24 @@ $items = at_initiatives();
 					$status = at_initiative_status_label( (string) get_post_meta( $item->ID, '_at_init_status', true ) );
 					$lead   = (int) $item->ID === at_initiative_lead_id();
 					?>
-					<a class="fund-line" href="<?php echo esc_url( get_permalink( $item ) ); ?>">
-						<span class="fund-line__no" aria-hidden="true"><?php echo esc_html( at_initiative_no( $index + 1 ) ); ?></span>
-						<span class="fund-line__body">
+					<?php $portrait = at_initiative_portrait( $item ); ?>
+					<article class="fund-line">
+						<?php if ( $portrait ) : ?>
+							<a class="fund-line__media" href="<?php echo esc_url( get_permalink( $item ) ); ?>">
+								<img src="<?php echo esc_url( $portrait['url'] ); ?>" alt="" width="120" height="156">
+							</a>
+						<?php else : ?>
+							<span class="fund-line__no" aria-hidden="true"><?php echo esc_html( at_initiative_no( $index + 1 ) ); ?></span>
+						<?php endif; ?>
+						<a class="fund-line__body" href="<?php echo esc_url( get_permalink( $item ) ); ?>">
 							<span class="kicker"><?php echo esc_html( $status ); ?><?php echo $place ? ' · ' . esc_html( $place ) : ''; ?></span>
 							<span class="fund-line__title"<?php echo $lead ? ' style="view-transition-name:at-fund-lead"' : ''; ?>><?php echo esc_html( get_the_title( $item ) ); ?></span>
 							<?php if ( has_excerpt( $item ) ) : ?>
 								<span class="fund-line__deck"><?php echo esc_html( get_the_excerpt( $item ) ); ?></span>
 							<?php endif; ?>
-						</span>
-						<span class="section__link">Открыть</span>
-					</a>
+						</a>
+						<?php at_vote_markup( $item->ID, true ); ?>
+					</article>
 				<?php endforeach; ?>
 			</div>
 		<?php else : ?>
