@@ -547,6 +547,12 @@ function at_meta_line( $post_id ) {
 	if ( $views ) {
 		$parts[] = '<span>' . $views . '</span>';
 	}
+	if ( is_singular() && (int) $post_id === (int) get_queried_object_id() ) {
+		$reading = at_reading_stats( $post_id );
+		if ( $reading['words'] > 40 ) {
+			$parts[] = '<span>' . esc_html( at_ru_plural( $reading['minutes'], 'минута', 'минуты', 'минут' ) ) . '</span>';
+		}
+	}
 	echo '<div class="meta">' . implode( '', $parts ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 

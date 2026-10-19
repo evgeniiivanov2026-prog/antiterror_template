@@ -164,7 +164,10 @@
   if (window.atView && window.atView.id && window.atView.endpoint) {
     fetch(window.atView.endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-WP-Nonce": window.atView.nonce || ""
+      },
       credentials: "same-origin",
       keepalive: true,
       body: JSON.stringify({ id: window.atView.id })

@@ -18,6 +18,10 @@ The contact handler is shared (`at_contact_send`): sanitize, honeypot, consent, 
 
 Scroll reveals follow the section rhythm of the paper layout and stay off when `prefers-reduced-motion` is set.
 
+## 1.13
+
+Patterns taken from the Redsign Media news template, without its jQuery plugins: a CSS trending rail, share links, previous and next stories, reading time, and an RSS enclosure with a non-adult rating. Search results and previews are `noindex`. Schema, Open Graph, and archive lists were tightened. View counting now requires the REST nonce and an hourly cap. Public user routes, XML-RPC, and pingbacks are closed. Response headers set `nosniff`, a referrer policy, `SAMEORIGIN`, and HSTS on HTTPS.
+
 ## Install
 
 Copy the `antiterror-press` directory into `wp-content/themes/` and activate it. Existing 1.11 content, menus, and customizer values keep working.

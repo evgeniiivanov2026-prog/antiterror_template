@@ -84,6 +84,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 </footer>
+<button class="to-top" type="button" data-to-top hidden>Наверх</button>
+<p class="toast" data-toast role="status" hidden></p>
 <?php wp_footer(); ?>
 </body>
 </html>

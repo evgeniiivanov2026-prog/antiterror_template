@@ -425,4 +425,92 @@
       });
     });
   });
+
+  var toast = document.querySelector("[data-toast]");
+  var toastTimer = 0;
+  function showToast(text) {
+    if (!toast) return;
+    toast.hidden = false;
+    toast.textContent = text;
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.hidden = true; }, 2200);
+  }
+
+  document.querySelectorAll("[data-copy-link]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var value = button.getAttribute("data-copy-value") || window.location.href;
+      var done = function () { showToast("Ссылка скопирована"); };
+      var fallback = function () {
+        var area = document.createElement("textarea");
+        area.value = value;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.left = "-999px";
+        document.body.appendChild(area);
+        area.select();
+        var copied = false;
+        try { copied = document.execCommand("copy"); } catch (error) { copied = false; }
+        area.remove();
+        if (copied) done();
+        else showToast("Скопируйте ссылку из адреса страницы");
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(value).then(done).catch(fallback);
+        return;
+      }
+      fallback();
+    });
+  });
+
+  var toTop = document.querySelector("[data-to-top]");
+  if (toTop) {
+    toTop.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    });
+    document.addEventListener("scroll", function () {
+      toTop.hidden = window.scrollY < 640;
+    }, { passive: true });
+  }
+
+  document.querySelectorAll("[data-count]").forEach(function (node) {
+    var target = parseInt(node.getAttribute("data-count") || "0", 10);
+    if (!target || reduceMotion || !("IntersectionObserver" in window)) return;
+    var started = false;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting || started) return;
+        started = true;
+        observer.unobserve(node);
+        var start = 0;
+        var duration = 700;
+        var t0 = 0;
+        function frame(now) {
+          if (!t0) t0 = now;
+          var progress = Math.min(1, (now - t0) / duration);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          node.textContent = String(Math.round(target * eased));
+          if (progress < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      });
+    }, { threshold: 0.6 });
+    observer.observe(node);
+  });
+
+  var prefetched = Object.create(null);
+  var prefetchCount = 0;
+  document.addEventListener("pointerover", function (event) {
+    if (prefetchCount > 24) return;
+    var link = event.target.closest ? event.target.closest("a[href]") : null;
+    if (!link || link.target === "_blank" || link.origin !== window.location.origin) return;
+    if (prefetched[link.href]) return;
+    if (/\/wp-admin|wp-login\.php|[?&]s=/.test(link.href)) return;
+    prefetched[link.href] = true;
+    prefetchCount += 1;
+    var hint = document.createElement("link");
+    hint.rel = "prefetch";
+    hint.as = "document";
+    hint.href = link.href;
+    document.head.appendChild(hint);
+  }, { passive: true });
 })();

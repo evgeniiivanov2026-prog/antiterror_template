@@ -24,55 +24,96 @@ function at_meta_description() {
 	if ( is_page_template( 'page-templates/template-media.php' ) ) {
 		$excerpt = get_the_excerpt();
 		if ( $excerpt ) {
-			return at_trim_meta( $excerpt );
+			return at_paged_description( at_trim_meta( $excerpt ) );
 		}
-		return 'Архив фото и видео: портреты сотрудников и кадры материалов по темам журнала.';
+		return at_paged_description( 'Архив фото и видео: портреты сотрудников и кадры материалов по темам журнала.' );
 	}
 	if ( is_singular() ) {
 		$post = get_queried_object();
 		if ( $post instanceof WP_Post && has_excerpt( $post ) ) {
-			return at_trim_meta( get_the_excerpt( $post ) );
+			return at_paged_description( at_trim_meta( get_the_excerpt( $post ) ) );
 		}
 		if ( $post instanceof WP_Post ) {
-			return at_trim_meta( $post->post_content );
+			return at_paged_description( at_trim_meta( $post->post_content ) );
 		}
 	}
 	if ( is_category() || is_tag() || is_tax() ) {
 		$desc = term_description();
 		if ( $desc ) {
-			return at_trim_meta( $desc );
+			return at_paged_description( at_trim_meta( $desc ) );
 		}
-		return at_trim_meta( sprintf( 'Материалы раздела «%s» в журнале «%s».', single_term_title( '', false ), get_bloginfo( 'name' ) ) );
+		return at_paged_description( at_trim_meta( sprintf( 'Материалы раздела «%s» в журнале «%s».', single_term_title( '', false ), get_bloginfo( 'name' ) ) ) );
 	}
 	$description = get_bloginfo( 'description' );
 	if ( $description ) {
-		return at_trim_meta( $description );
+		return at_paged_description( at_trim_meta( $description ) );
 	}
-	return 'Журнал о борьбе с терроризмом и экстремизмом. За межнациональную дружбу.';
+	return at_paged_description( 'Журнал о борьбе с терроризмом и экстремизмом. За межнациональную дружбу.' );
+}
+
+/**
+ * Distinguish paged archives so descriptions are not identical.
+ *
+ * @param string $text Description.
+ * @return string
+ */
+function at_paged_description( $text ) {
+	$text  = (string) $text;
+	$paged = max( (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
+	if ( $paged > 1 && '' !== $text ) {
+		return at_trim_meta( $text . ' Страница ' . $paged . '.' );
+	}
+	return $text;
+}
+
+function at_share_media() {
+	$media = array(
+		'url'    => '',
+		'width'  => 0,
+		'height' => 0,
+		'alt'    => '',
+	);
+	if ( is_singular() ) {
+		$id = get_queried_object_id();
+		$thumb = get_post_thumbnail_id( $id );
+		if ( $thumb ) {
+			$src = wp_get_attachment_image_src( $thumb, 'large' );
+			if ( $src ) {
+				$media['url']    = at_public_url( $src[0] );
+				$media['width']  = (int) $src[1];
+				$media['height'] = (int) $src[2];
+				$media['alt']    = (string) get_post_meta( $thumb, '_wp_attachment_image_alt', true );
+				if ( '' === $media['alt'] ) {
+					$media['alt'] = get_the_title( $id );
+				}
+			}
+		}
+		if ( ! $media['url'] ) {
+			$sources = at_lead_sources( $id );
+			if ( ! empty( $sources['image'] ) ) {
+				$media['url'] = at_public_url( $sources['image'] );
+				$media['alt'] = get_the_title( $id );
+			}
+		}
+	}
+	if ( ! $media['url'] ) {
+		$logo = (int) get_theme_mod( 'custom_logo' );
+		if ( $logo ) {
+			$src = wp_get_attachment_image_src( $logo, 'full' );
+			if ( $src ) {
+				$media['url']    = at_public_url( $src[0] );
+				$media['width']  = (int) $src[1];
+				$media['height'] = (int) $src[2];
+				$media['alt']    = get_bloginfo( 'name' );
+			}
+		}
+	}
+	return $media;
 }
 
 function at_share_image() {
-	if ( is_singular() ) {
-		$id = get_queried_object_id();
-		if ( has_post_thumbnail( $id ) ) {
-			$url = get_the_post_thumbnail_url( $id, 'large' );
-			if ( $url ) {
-				return $url;
-			}
-		}
-		$sources = at_lead_sources( $id );
-		if ( ! empty( $sources['image'] ) ) {
-			return $sources['image'];
-		}
-	}
-	$logo = (int) get_theme_mod( 'custom_logo' );
-	if ( $logo ) {
-		$url = wp_get_attachment_image_url( $logo, 'full' );
-		if ( $url ) {
-			return $url;
-		}
-	}
-	return '';
+	$media = at_share_media();
+	return $media['url'];
 }
 
 function at_current_url() {
@@ -98,7 +139,9 @@ function at_robots( $robots ) {
 		$robots['follow']  = true;
 		return $robots;
 	}
-	if ( is_search() ) {
+	if ( is_search() || is_preview() ) {
+		$robots['noindex'] = true;
+		$robots['follow']  = true;
 		return $robots;
 	}
 	$robots['max-image-preview'] = 'large';
@@ -129,13 +172,24 @@ function at_schema_graph() {
 		'url'   => $home,
 	);
 	if ( $logo ) {
-		$logo_url = wp_get_attachment_image_url( $logo, 'full' );
+		$logo_url = at_public_url( (string) wp_get_attachment_image_url( $logo, 'full' ) );
 		if ( $logo_url ) {
 			$org['logo'] = array(
 				'@type' => 'ImageObject',
 				'url'   => $logo_url,
 			);
 		}
+	}
+	$phone   = trim( (string) get_theme_mod( 'at_org_phone', '' ) );
+	$address = trim( (string) get_theme_mod( 'at_org_address', '' ) );
+	if ( $phone ) {
+		$org['telephone'] = $phone;
+	}
+	if ( $address ) {
+		$org['address'] = array(
+			'@type'         => 'PostalAddress',
+			'streetAddress' => $address,
+		);
 	}
 	$same = array_filter(
 		array(
@@ -215,6 +269,16 @@ function at_schema_graph() {
 		if ( $image ) {
 			$entry['image'] = array( $image );
 		}
+		$stats = at_reading_stats( $post->ID );
+		if ( $stats['words'] > 0 ) {
+			$entry['wordCount']    = $stats['words'];
+			$entry['timeRequired'] = 'PT' . $stats['minutes'] . 'M';
+		}
+		$entry['isAccessibleForFree'] = true;
+		$tags = get_the_tags( $post->ID );
+		if ( $tags && ! is_wp_error( $tags ) ) {
+			$entry['keywords'] = implode( ', ', wp_list_pluck( $tags, 'name' ) );
+		}
 		$cat = at_primary_category( $post->ID );
 		if ( $cat ) {
 			$entry['articleSection'] = $cat->name;
@@ -239,6 +303,25 @@ function at_schema_graph() {
 			$entry['mainEntity'] = $person;
 		}
 		$graph[] = $entry;
+	} elseif ( is_singular( array( 'at_milestone', 'bpla_event' ) ) ) {
+		$post  = get_queried_object();
+		$image = at_share_image();
+		$entry = array(
+			'@type'            => 'Article',
+			'@id'              => get_permalink( $post ) . '#entry',
+			'headline'         => get_the_title( $post ),
+			'url'              => get_permalink( $post ),
+			'datePublished'    => get_the_date( 'c', $post ),
+			'dateModified'     => get_the_modified_date( 'c', $post ),
+			'description'      => at_meta_description(),
+			'inLanguage'       => get_locale(),
+			'mainEntityOfPage' => get_permalink( $post ),
+			'publisher'        => array( '@id' => $home . '#org' ),
+		);
+		if ( $image ) {
+			$entry['image'] = array( $image );
+		}
+		$graph[] = $entry;
 	} elseif ( is_page_template( 'page-templates/template-media.php' ) ) {
 		$graph[] = array(
 			'@type'       => 'CollectionPage',
@@ -248,6 +331,44 @@ function at_schema_graph() {
 			'description' => at_meta_description(),
 			'isPartOf'    => array( '@id' => $home . '#website' ),
 		);
+	}
+
+	$url         = at_current_url();
+	$description = at_meta_description();
+	$graph[]     = array(
+		'@type'       => 'WebPage',
+		'@id'         => $url . '#webpage',
+		'url'         => $url,
+		'name'        => wp_get_document_title(),
+		'description' => $description,
+		'isPartOf'    => array( '@id' => $home . '#website' ),
+		'inLanguage'  => get_locale(),
+	);
+
+	if ( is_home() || is_archive() || is_search() ) {
+		global $wp_query;
+		$elements = array();
+		$position = 1;
+		$posts    = ( $wp_query instanceof WP_Query ) ? array_slice( $wp_query->posts, 0, 12 ) : array();
+		foreach ( $posts as $list_post ) {
+			if ( ! $list_post instanceof WP_Post || 'publish' !== $list_post->post_status ) {
+				continue;
+			}
+			$elements[] = array(
+				'@type'    => 'ListItem',
+				'position' => $position,
+				'url'      => get_permalink( $list_post ),
+				'name'     => get_the_title( $list_post ),
+			);
+			$position++;
+		}
+		if ( $elements ) {
+			$graph[] = array(
+				'@type'           => 'ItemList',
+				'@id'             => $url . '#list',
+				'itemListElement' => $elements,
+			);
+		}
 	}
 
 	return array(
@@ -266,8 +387,9 @@ function at_seo_head() {
 	}
 	$title = wp_get_document_title();
 	$url   = at_current_url();
-	$type  = is_singular( 'post' ) ? 'article' : 'website';
-	$image = at_share_image();
+	$type  = is_singular( array( 'post', 'at_milestone', 'bpla_event' ) ) ? 'article' : 'website';
+	$media = at_share_media();
+	$image = $media['url'];
 	echo '<meta property="og:locale" content="' . esc_attr( get_locale() ) . '">' . "\n";
 	echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo( 'name' ) ) . '">' . "\n";
 	echo '<meta property="og:title" content="' . esc_attr( $title ) . '">' . "\n";
@@ -278,13 +400,24 @@ function at_seo_head() {
 	}
 	if ( $image ) {
 		echo '<meta property="og:image" content="' . esc_url( $image ) . '">' . "\n";
+		echo '<meta property="og:image:alt" content="' . esc_attr( $media['alt'] ) . '">' . "\n";
+		if ( $media['width'] && $media['height'] ) {
+			echo '<meta property="og:image:width" content="' . esc_attr( (string) $media['width'] ) . '">' . "\n";
+			echo '<meta property="og:image:height" content="' . esc_attr( (string) $media['height'] ) . '">' . "\n";
+		}
 	}
-	if ( is_singular( 'post' ) ) {
+	if ( is_singular( array( 'post', 'at_milestone', 'bpla_event' ) ) ) {
 		echo '<meta property="article:published_time" content="' . esc_attr( get_the_date( 'c' ) ) . '">' . "\n";
 		echo '<meta property="article:modified_time" content="' . esc_attr( get_the_modified_date( 'c' ) ) . '">' . "\n";
 		$cat = at_primary_category();
 		if ( $cat ) {
 			echo '<meta property="article:section" content="' . esc_attr( $cat->name ) . '">' . "\n";
+		}
+		$tags = get_the_tags();
+		if ( $tags && ! is_wp_error( $tags ) ) {
+			foreach ( array_slice( $tags, 0, 6 ) as $tag ) {
+				echo '<meta property="article:tag" content="' . esc_attr( $tag->name ) . '">' . "\n";
+			}
 		}
 	}
 	echo '<meta name="twitter:card" content="' . esc_attr( $image ? 'summary_large_image' : 'summary' ) . '">' . "\n";
@@ -294,9 +427,13 @@ function at_seo_head() {
 	}
 	if ( $image ) {
 		echo '<meta name="twitter:image" content="' . esc_url( $image ) . '">' . "\n";
+		echo '<meta name="twitter:image:alt" content="' . esc_attr( $media['alt'] ) . '">' . "\n";
 	}
 
-	$schema = wp_json_encode( at_schema_graph(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	$schema = wp_json_encode(
+		at_schema_graph(),
+		JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+	);
 	if ( $schema ) {
 		echo '<script type="application/ld+json">' . $schema . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}

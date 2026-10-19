@@ -35,7 +35,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="utility">
 	<div class="wrap utility__inner">
-		<p><?php echo esc_html( get_theme_mod( 'at_tagline_short', 'Борьба с терроризмом и экстремизмом. За межнациональную дружбу.' ) ); ?></p>
+		<p class="utility__label"><?php echo esc_html( get_theme_mod( 'at_tagline_short', 'Борьба с терроризмом и экстремизмом. За межнациональную дружбу.' ) ); ?></p>
+		<?php at_trending_markup(); ?>
 		<?php at_social_links(); ?>
 	</div>
 </div>

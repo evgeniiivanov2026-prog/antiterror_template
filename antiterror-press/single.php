@@ -80,6 +80,12 @@ get_header();
 					<?php the_content(); ?>
 				</div>
 				<?php
+				$tags = get_the_tag_list( '', ' ' );
+				if ( $tags ) {
+					echo '<div class="article__tags"><p class="kicker">Метки</p>' . wp_kses_post( $tags ) . '</div>';
+				}
+				at_share_markup();
+				at_sibling_markup();
 				wp_link_pages( array( 'before' => '<nav class="pagination">', 'after' => '</nav>' ) );
 				if ( comments_open() || get_comments_number() ) {
 					comments_template();

@@ -14,6 +14,7 @@ require get_template_directory() . '/inc/meta.php';
 require get_template_directory() . '/inc/seo.php';
 require get_template_directory() . '/inc/milestones.php';
 require get_template_directory() . '/inc/interact.php';
+require get_template_directory() . '/inc/polish.php';
 
 function at_setup() {
 	load_theme_textdomain( 'antiterror-press', get_template_directory() . '/languages' );
@@ -77,6 +78,7 @@ function at_assets() {
 			'atView',
 			array(
 				'endpoint' => esc_url_raw( rest_url( 'at/v1/view' ) ),
+				'nonce'    => wp_create_nonce( 'wp_rest' ),
 				'id'       => get_queried_object_id(),
 			)
 		);
@@ -162,9 +164,14 @@ function at_speculation_rules() {
 		'prefetch' => array(
 			array(
 				'where'     => array(
-					'href_matches' => '/*',
+					'and' => array(
+						array( 'href_matches' => '/*' ),
+						array( 'not' => array( 'href_matches' => '/wp-admin/*' ) ),
+						array( 'not' => array( 'href_matches' => '/wp-login.php*' ) ),
+						array( 'not' => array( 'href_matches' => '/*\\?*(^|&)s=*' ) ),
+					),
 				),
-				'eagerness' => 'moderate',
+				'eagerness' => 'conservative',
 			),
 		),
 	);
@@ -178,7 +185,7 @@ function at_register_view_route() {
 		'/view',
 		array(
 			'methods'             => 'POST',
-			'permission_callback' => '__return_true',
+			'permission_callback' => 'at_rest_nonce_permission',
 			'callback'            => 'at_count_view',
 			'args'                => array(
 				'id' => array(
@@ -197,7 +204,7 @@ function at_count_view( $request ) {
 	if ( ! $post || 'post' !== $post->post_type || 'publish' !== $post->post_status ) {
 		return new WP_REST_Response( array( 'ok' => false ), 404 );
 	}
-	if ( is_user_logged_in() ) {
+	if ( is_user_logged_in() || at_view_is_limited() ) {
 		return array( 'ok' => true, 'counted' => false );
 	}
 	$cookie = 'at_seen_' . $post_id;

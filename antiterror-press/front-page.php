@@ -212,15 +212,15 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 			<?php if ( $bpla_total ) : ?>
 			<div class="bpla-stats" aria-label="Сводка">
 				<div class="bpla-stat">
-					<span class="bpla-stat__num"><?php echo esc_html( $bpla_total ); ?></span>
+					<span class="bpla-stat__num" data-count="<?php echo esc_attr( (string) $bpla_total ); ?>"><?php echo esc_html( $bpla_total ); ?></span>
 					<span class="bpla-stat__label">событий</span>
 				</div>
 				<div class="bpla-stat">
-					<span class="bpla-stat__num"><?php echo esc_html( $bpla_destroyed ); ?></span>
+					<span class="bpla-stat__num" data-count="<?php echo esc_attr( (string) $bpla_destroyed ); ?>"><?php echo esc_html( $bpla_destroyed ); ?></span>
 					<span class="bpla-stat__label">перехватов</span>
 				</div>
 				<div class="bpla-stat">
-					<span class="bpla-stat__num"><?php echo esc_html( $bpla_region_count ); ?></span>
+					<span class="bpla-stat__num" data-count="<?php echo esc_attr( (string) $bpla_region_count ); ?>"><?php echo esc_html( $bpla_region_count ); ?></span>
 					<span class="bpla-stat__label">регионов</span>
 				</div>
 			</div>
