@@ -16,6 +16,7 @@ require get_template_directory() . '/inc/milestones.php';
 require get_template_directory() . '/inc/initiatives.php';
 require get_template_directory() . '/inc/interact.php';
 require get_template_directory() . '/inc/polish.php';
+require get_template_directory() . '/inc/desk.php';
 
 function at_setup() {
 	load_theme_textdomain( 'antiterror-press', get_template_directory() . '/languages' );
@@ -66,6 +67,10 @@ function at_assets() {
 	wp_enqueue_script( 'at-motion', get_template_directory_uri() . '/assets/js/motion.js', array(), filemtime( $motion_js ), true );
 	wp_enqueue_style( 'at-interact', get_template_directory_uri() . '/assets/css/interact.css', array( 'at-motion' ), filemtime( $interact_css ) );
 	wp_enqueue_script( 'at-interact', get_template_directory_uri() . '/assets/js/interact.js', array( 'at-motion' ), filemtime( $interact_js ), true );
+	$desk_css = get_template_directory() . '/assets/css/desk.css';
+	$desk_js  = get_template_directory() . '/assets/js/desk.js';
+	wp_enqueue_style( 'at-desk', get_template_directory_uri() . '/assets/css/desk.css', array( 'at-interact' ), filemtime( $desk_css ) );
+	wp_enqueue_script( 'at-desk', get_template_directory_uri() . '/assets/js/desk.js', array( 'at-theme' ), filemtime( $desk_js ), true );
 	wp_localize_script(
 		'at-interact',
 		'atInteract',

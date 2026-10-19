@@ -93,6 +93,10 @@ get_header();
 				?>
 			</div>
 			<aside class="rail">
+				<nav class="toc" data-toc hidden>
+					<h2>В этом материале</h2>
+					<ol data-toc-list></ol>
+				</nav>
 				<?php get_sidebar(); ?>
 			</aside>
 		</article>

@@ -59,7 +59,7 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 				<p class="deck" style="margin-top:14px;">Опубликуйте первую запись. Бойцов удобно собирать в рубрике с ярлыком heroes.</p>
 			</section>
 		<?php else : ?>
-			<section class="lead" aria-label="Главные материалы">
+			<section class="lead" id="glavnoe" aria-label="Главные материалы">
 				<article class="feature">
 					<?php $feature_media = at_media_html( $feature->ID, 'at-portrait', array( 'fetchpriority' => 'high', 'loading' => 'eager' ) ); ?>
 					<?php if ( $feature_media ) : ?>
@@ -101,8 +101,19 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 			</section>
 		<?php endif; ?>
 
+		<?php
+		get_template_part(
+			'template-parts/desk',
+			'front',
+			array(
+				'has_feed'    => (bool) $rest,
+				'has_feature' => (bool) $feature,
+			)
+		);
+		?>
+
 		<?php if ( $rest ) : ?>
-			<section class="section" aria-labelledby="journal-heading">
+			<section class="section" id="lenta" aria-labelledby="journal-heading">
 				<div class="section__head">
 					<h2 id="journal-heading">Лента</h2>
 					<a class="section__link" href="<?php echo esc_url( at_page_url( 'zhurnal' ) ); ?>">Весь журнал</a>
@@ -197,7 +208,7 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 	}
 	$bpla_region_count = count( $bpla_regions );
 	?>
-	<section class="bpla-section" aria-labelledby="bpla-heading">
+	<section class="bpla-section" id="svodka" aria-labelledby="bpla-heading">
 		<div class="wrap">
 			<header class="bpla-header">
 				<div>
@@ -309,7 +320,7 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 	</section>
 	<?php endif; ?>
 
-	<section class="band" aria-labelledby="fighters-heading">
+	<section class="band" id="ljudi" aria-labelledby="fighters-heading">
 		<div class="wrap band__inner">
 			<div class="section__head">
 				<h2 id="fighters-heading">Бойцы антитеррора</h2>
@@ -396,6 +407,7 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 	<?php endif; ?>
 
 	<div class="wrap">
+		<?php get_template_part( 'template-parts/desk', 'sections' ); ?>
 		<section class="contest" aria-labelledby="contest-heading">
 			<div>
 				<p class="kicker">Конкурс</p>

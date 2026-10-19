@@ -100,6 +100,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<button class="search-close" type="button" data-search-close>Закрыть</button>
 		<h2 id="search-title">Поиск по журналу</h2>
 		<?php get_search_form(); ?>
+		<?php $hints = at_desk_hints(); ?>
+		<?php if ( $hints ) : ?>
+			<div class="search-hints">
+				<p class="kicker">Свежие материалы</p>
+				<ul>
+					<?php foreach ( $hints as $hint ) : ?>
+						<li><a href="<?php echo esc_url( $hint['url'] ); ?>"><?php echo esc_html( $hint['title'] ); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+		<?php endif; ?>
 		<div class="search-live" data-search-live hidden></div>
 	</div>
 </div>

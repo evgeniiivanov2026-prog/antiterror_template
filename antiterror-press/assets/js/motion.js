@@ -100,7 +100,7 @@
     reduced: reduced
   };
 
-  watch(".page-hero, .feature, .lead, .story, .person-card, .side-story, .row, .siblings__link, .vehi-rail__item, .share, .fund-lead, .fund-row, .fund-line");
+  watch(".page-hero, .feature, .lead, .story, .person-card, .side-story, .row, .siblings__link, .vehi-rail__item, .share, .fund-lead, .fund-row, .fund-line, .issue-cell, .rubric, .section-card");
 
   window.setTimeout(function () {
     document.querySelectorAll(".at-enter:not(.is-in)").forEach(function (node) {

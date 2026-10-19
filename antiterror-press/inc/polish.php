@@ -337,7 +337,7 @@ function at_motion_body_class( $classes ) {
 add_filter( 'body_class', 'at_motion_body_class' );
 
 function at_script_strategy() {
-	foreach ( array( 'at-motion', 'at-theme', 'at-interact' ) as $handle ) {
+	foreach ( array( 'at-motion', 'at-theme', 'at-interact', 'at-desk' ) as $handle ) {
 		wp_script_add_data( $handle, 'strategy', 'defer' );
 	}
 }

@@ -35,6 +35,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </dialog>
 
+<?php if ( ! is_page_template( 'page-templates/template-contact.php' ) ) : ?>
+<section class="colophon" aria-labelledby="colophon-heading">
+	<div class="wrap colophon__inner">
+		<div>
+			<p class="kicker">Редакция</p>
+			<h2 id="colophon-heading">Написать в номер</h2>
+			<p>Короткое письмо о материале, вопросе или инициативе. Ответ придёт на почту, которую вы укажете.</p>
+		</div>
+		<div class="colophon__actions">
+			<button class="btn" type="button" data-contact-open data-contact-topic="Письмо в редакцию">Написать</button>
+			<a class="btn btn--ghost" href="<?php echo esc_url( at_page_url( 'fond-iniciativ' ) ); ?>">Фонд инициатив</a>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
 <footer class="footer">
 	<div class="wrap">
 		<div class="footer__grid">
@@ -84,7 +100,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 </footer>
+<button class="desk-write" type="button" data-contact-open data-contact-topic="Письмо в редакцию" hidden>Написать</button>
 <button class="to-top" type="button" data-to-top hidden>Наверх</button>
+<nav class="dock" aria-label="Быстрые разделы">
+	<a href="<?php echo esc_url( home_url( '/' ) ); ?>"<?php echo is_front_page() ? ' aria-current="page"' : ''; ?>>
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20H4v-8.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+		Главная
+	</a>
+	<a href="<?php echo esc_url( at_page_url( 'zhurnal' ) ); ?>"<?php echo is_page( 'zhurnal' ) ? ' aria-current="page"' : ''; ?>>
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 5h12v14H6V5Z" stroke="currentColor" stroke-width="1.6"/><path d="M9 9h6M9 13h6" stroke="currentColor" stroke-width="1.6"/></svg>
+		Журнал
+	</a>
+	<button type="button" data-dock-search>
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="m16 16.5 4 4" stroke="currentColor" stroke-width="1.6"/></svg>
+		Поиск
+	</button>
+	<a href="<?php echo esc_url( at_page_url( 'fond-iniciativ' ) ); ?>"<?php echo ( is_page( 'fond-iniciativ' ) || is_singular( 'at_initiative' ) ) ? ' aria-current="page"' : ''; ?>>
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 15.5V5.8L18 4v9.2" stroke="currentColor" stroke-width="1.6"/><path d="M6 15.5c0 1.8 2.7 3 6 3s6-1.2 6-3" stroke="currentColor" stroke-width="1.6"/></svg>
+		Фонд
+	</a>
+	<button type="button" data-dock-menu>
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.6"/></svg>
+		Меню
+	</button>
+</nav>
 <p class="toast" data-toast role="status" hidden></p>
 <?php wp_footer(); ?>
 </body>

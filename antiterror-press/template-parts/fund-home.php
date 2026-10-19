@@ -18,7 +18,7 @@ $place    = get_post_meta( $lead->ID, '_at_init_place', true );
 $status   = at_initiative_status_label( (string) get_post_meta( $lead->ID, '_at_init_status', true ) );
 $portrait = at_initiative_portrait( $lead );
 ?>
-<section class="fund" aria-labelledby="fund-heading">
+<section class="fund" id="fond" aria-labelledby="fund-heading">
 	<div class="wrap">
 		<div class="section__head">
 			<h2 id="fund-heading">Фонд инициатив</h2>
