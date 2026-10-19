@@ -272,16 +272,20 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 		</div>
 	</section>
 
+	<?php get_template_part( 'template-parts/fund', 'home' ); ?>
+
 	<?php
-	$vehi_order = array( 'nord-ost', 'beslan', 'budyonnovsk', 'ordzhonikidze', 'kizlyar', 'krokus', 'alfa' );
-	$vehi_by    = array();
-	foreach ( at_milestones() as $vehi_item ) {
-		$vehi_by[ $vehi_item->post_name ] = $vehi_item;
-	}
 	$vehi_home = array();
-	foreach ( $vehi_order as $vehi_slug ) {
-		if ( isset( $vehi_by[ $vehi_slug ] ) ) {
-			$vehi_home[] = $vehi_by[ $vehi_slug ];
+	if ( get_theme_mod( 'at_home_milestones', false ) ) {
+		$vehi_order = array( 'nord-ost', 'beslan', 'budyonnovsk', 'ordzhonikidze', 'kizlyar', 'krokus', 'alfa' );
+		$vehi_by    = array();
+		foreach ( at_milestones() as $vehi_item ) {
+			$vehi_by[ $vehi_item->post_name ] = $vehi_item;
+		}
+		foreach ( $vehi_order as $vehi_slug ) {
+			if ( isset( $vehi_by[ $vehi_slug ] ) ) {
+				$vehi_home[] = $vehi_by[ $vehi_slug ];
+			}
 		}
 	}
 	?>

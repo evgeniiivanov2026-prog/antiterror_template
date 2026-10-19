@@ -577,6 +577,9 @@ function at_crumb_trail() {
 	} elseif ( is_singular( 'at_milestone' ) ) {
 		$trail[] = array( 'Вехи истории', at_page_url( 'vehi-istorii' ) );
 		$trail[] = array( get_the_title(), '' );
+	} elseif ( is_singular( 'at_initiative' ) ) {
+		$trail[] = array( 'Фонд инициатив', at_page_url( 'fond-iniciativ' ) );
+		$trail[] = array( get_the_title(), '' );
 	} elseif ( is_page() ) {
 		$trail[] = array( get_the_title(), '' );
 	} elseif ( is_category() || is_tag() || is_tax() || is_archive() ) {
@@ -607,6 +610,7 @@ function at_breadcrumbs() {
 function at_fallback_menu( $args = array() ) {
 	$items = array(
 		array( 'Бойцы', at_page_url( 'geroi-antiterrora' ) ),
+		array( 'Фонд инициатив', at_page_url( 'fond-iniciativ' ) ),
 		array( 'Вехи истории', at_page_url( 'vehi-istorii' ) ),
 		array( 'Журнал', at_page_url( 'zhurnal' ) ),
 		array( 'Архив', at_page_url( 'arhiv' ) ),

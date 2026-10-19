@@ -107,7 +107,10 @@
   .person-card,
   .side-story,
   .siblings__link,
-  .row {
+  .row,
+  .fund-lead,
+  .fund-row,
+  .fund-line {
     transition:
       transform var(--at-dur-m) var(--at-ease-out),
       border-color var(--at-dur-s) linear,
@@ -117,7 +120,10 @@
   .person-card:hover,
   .side-story:hover,
   .siblings__link:hover,
-  .row:hover {
+  .row:hover,
+  .fund-lead:hover,
+  .fund-row:hover,
+  .fund-line:hover {
     transform: translateY(var(--at-lift));
   }
   .nav a,

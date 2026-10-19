@@ -13,6 +13,7 @@ require get_template_directory() . '/inc/template-tags.php';
 require get_template_directory() . '/inc/meta.php';
 require get_template_directory() . '/inc/seo.php';
 require get_template_directory() . '/inc/milestones.php';
+require get_template_directory() . '/inc/initiatives.php';
 require get_template_directory() . '/inc/interact.php';
 require get_template_directory() . '/inc/polish.php';
 
@@ -293,6 +294,21 @@ function at_customize( $wp_customize ) {
 		array(
 			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
+		)
+	);
+	$wp_customize->add_setting(
+		'at_home_milestones',
+		array(
+			'default'           => false,
+			'sanitize_callback' => 'wp_validate_boolean',
+		)
+	);
+	$wp_customize->add_control(
+		'at_home_milestones',
+		array(
+			'label'   => 'Показывать блок «Вехи истории» на главной',
+			'section' => 'at_journal',
+			'type'    => 'checkbox',
 		)
 	);
 	$wp_customize->add_control(

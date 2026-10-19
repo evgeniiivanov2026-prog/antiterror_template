@@ -150,7 +150,7 @@ function at_trending_markup() {
  * Share row for the open story. Networks are plain links, not widgets.
  */
 function at_share_markup() {
-	if ( ! is_singular( 'post' ) ) {
+	if ( ! is_singular( array( 'post', 'at_initiative' ) ) ) {
 		return;
 	}
 	$url   = at_public_url( get_permalink() );

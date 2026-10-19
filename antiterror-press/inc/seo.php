@@ -303,7 +303,7 @@ function at_schema_graph() {
 			$entry['mainEntity'] = $person;
 		}
 		$graph[] = $entry;
-	} elseif ( is_singular( array( 'at_milestone', 'bpla_event' ) ) ) {
+	} elseif ( is_singular( array( 'at_milestone', 'bpla_event', 'at_initiative' ) ) ) {
 		$post  = get_queried_object();
 		$image = at_share_image();
 		$entry = array(
@@ -387,7 +387,7 @@ function at_seo_head() {
 	}
 	$title = wp_get_document_title();
 	$url   = at_current_url();
-	$type  = is_singular( array( 'post', 'at_milestone', 'bpla_event' ) ) ? 'article' : 'website';
+	$type  = is_singular( array( 'post', 'at_milestone', 'bpla_event', 'at_initiative' ) ) ? 'article' : 'website';
 	$media = at_share_media();
 	$image = $media['url'];
 	echo '<meta property="og:locale" content="' . esc_attr( get_locale() ) . '">' . "\n";
@@ -406,7 +406,7 @@ function at_seo_head() {
 			echo '<meta property="og:image:height" content="' . esc_attr( (string) $media['height'] ) . '">' . "\n";
 		}
 	}
-	if ( is_singular( array( 'post', 'at_milestone', 'bpla_event' ) ) ) {
+	if ( is_singular( array( 'post', 'at_milestone', 'bpla_event', 'at_initiative' ) ) ) {
 		echo '<meta property="article:published_time" content="' . esc_attr( get_the_date( 'c' ) ) . '">' . "\n";
 		echo '<meta property="article:modified_time" content="' . esc_attr( get_the_modified_date( 'c' ) ) . '">' . "\n";
 		$cat = at_primary_category();

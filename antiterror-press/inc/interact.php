@@ -232,7 +232,7 @@ function at_feed_query_args( $request ) {
 			$search = function_exists( 'mb_substr' ) ? mb_substr( $search, 0, 80 ) : substr( $search, 0, 80 );
 		}
 		return array(
-			'post_type'           => array( 'post', 'page', 'at_milestone', 'bpla_event' ),
+			'post_type'           => array( 'post', 'page', 'at_milestone', 'bpla_event', 'at_initiative' ),
 			'post_status'         => 'publish',
 			's'                   => $search,
 			'posts_per_page'      => $per_page,
@@ -336,7 +336,7 @@ function at_rest_search( $request ) {
 
 	$query = new WP_Query(
 		array(
-			'post_type'           => array( 'post', 'page', 'at_milestone', 'bpla_event' ),
+			'post_type'           => array( 'post', 'page', 'at_milestone', 'bpla_event', 'at_initiative' ),
 			'post_status'         => 'publish',
 			's'                   => $search,
 			'posts_per_page'      => 8,
@@ -351,6 +351,8 @@ function at_rest_search( $request ) {
 			$kicker = at_kicker( $post->ID );
 		} elseif ( 'at_milestone' === $post->post_type ) {
 			$kicker = 'Вехи истории';
+		} elseif ( 'at_initiative' === $post->post_type ) {
+			$kicker = 'Фонд инициатив';
 		} elseif ( 'bpla_event' === $post->post_type ) {
 			$kicker = 'БПЛА';
 		} else {

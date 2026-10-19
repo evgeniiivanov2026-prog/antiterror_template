@@ -100,7 +100,7 @@
     reduced: reduced
   };
 
-  watch(".page-hero, .feature, .lead, .story, .person-card, .side-story, .row, .siblings__link, .vehi-rail__item, .share");
+  watch(".page-hero, .feature, .lead, .story, .person-card, .side-story, .row, .siblings__link, .vehi-rail__item, .share, .fund-lead, .fund-row, .fund-line");
 
   window.setTimeout(function () {
     document.querySelectorAll(".at-enter:not(.is-in)").forEach(function (node) {
