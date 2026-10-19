@@ -317,6 +317,21 @@ function at_customize( $wp_customize ) {
 			'type'    => 'checkbox',
 		)
 	);
+	$wp_customize->add_setting(
+		'at_home_bpla',
+		array(
+			'default'           => false,
+			'sanitize_callback' => 'wp_validate_boolean',
+		)
+	);
+	$wp_customize->add_control(
+		'at_home_bpla',
+		array(
+			'label'   => 'Показывать блок «События БПЛА» на главной',
+			'section' => 'at_journal',
+			'type'    => 'checkbox',
+		)
+	);
 	$wp_customize->add_control(
 		'at_yandex_maps_key',
 		array(

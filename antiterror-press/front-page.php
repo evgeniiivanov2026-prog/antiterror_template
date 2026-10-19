@@ -129,6 +129,7 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 		<?php endif; ?>
 	</div>
 
+	<?php if ( get_theme_mod( 'at_home_bpla', false ) ) : ?>
 	<?php
 	// Блок событий БПЛА
 	$bpla_query = new WP_Query(
@@ -282,6 +283,7 @@ $fighters = array_slice( at_sorted_fighters( -1 ), 0, 6 );
 			<?php endif; ?>
 		</div>
 	</section>
+	<?php endif; ?>
 
 	<?php get_template_part( 'template-parts/fund', 'home' ); ?>
 

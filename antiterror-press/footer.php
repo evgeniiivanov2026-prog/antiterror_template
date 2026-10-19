@@ -100,7 +100,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 </footer>
-<button class="desk-write" type="button" data-contact-open data-contact-topic="Письмо в редакцию" hidden>Написать</button>
 <button class="to-top" type="button" data-to-top hidden>Наверх</button>
 <nav class="dock" aria-label="Быстрые разделы">
 	<a href="<?php echo esc_url( home_url( '/' ) ); ?>"<?php echo is_front_page() ? ' aria-current="page"' : ''; ?>>

@@ -238,26 +238,8 @@
   color: var(--band);
 }
 
-.desk-write[hidden] { display: none; }
-.desk-write {
-  position: fixed;
-  right: 18px;
-  bottom: 72px;
-  z-index: 30;
-  min-height: 42px;
-  padding: 0 14px;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--paper);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  box-shadow: var(--shadow);
-}
-.desk-write:hover { background: var(--signal-deep); border-color: var(--signal-deep); }
-
 .to-top {
+  z-index: 46;
   border: 1px solid transparent;
   background:
     linear-gradient(var(--white), var(--white)) padding-box,
@@ -300,8 +282,8 @@ body.admin-bar .issue-jump { top: calc(var(--header) + 32px); }
   .section-grid,
   .rubric-grid { grid-template-columns: 1fr; }
   .colophon__inner { align-items: flex-start; flex-direction: column; }
-  .desk-write { display: none; }
-  .to-top { bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .to-top,
+  body.admin-bar .to-top { bottom: calc(74px + env(safe-area-inset-bottom)); }
   .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
   .dock {
     position: fixed;
@@ -357,8 +339,7 @@ body.admin-bar .issue-jump { top: calc(var(--header) + 32px); }
   }
   .rubric,
   .section-card,
-  .issue-jump a,
-  .desk-write {
+  .issue-jump a {
     transition:
       transform var(--at-dur-m, 460ms) var(--at-ease-out, ease),
       background-color var(--at-dur-s, 220ms) linear,

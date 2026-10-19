@@ -11,14 +11,11 @@
     root.style.setProperty("--header", mast.offsetHeight + "px");
   }
 
-  var write = document.querySelector(".desk-write");
-
   function paintScroll() {
     var max = root.scrollHeight - window.innerHeight;
     var progress = max > 0 ? Math.min(1, window.scrollY / max) : 0;
     root.style.setProperty("--scroll", String(Math.round(progress * 100)));
     if (mast) mast.classList.toggle("is-compact", window.scrollY > 72);
-    if (write) write.hidden = window.scrollY < 280;
     syncHeader();
   }
 

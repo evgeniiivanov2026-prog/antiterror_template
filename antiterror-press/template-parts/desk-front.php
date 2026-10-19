@@ -25,7 +25,9 @@ if ( $rubrics ) {
 if ( $has_feed ) {
 	$jumps[] = array( 'Лента', '#lenta' );
 }
-$jumps[] = array( 'Сводка', '#svodka' );
+if ( get_theme_mod( 'at_home_bpla', false ) ) {
+	$jumps[] = array( 'Сводка', '#svodka' );
+}
 if ( $has_fund ) {
 	$jumps[] = array( 'Фонд', '#fond' );
 }
