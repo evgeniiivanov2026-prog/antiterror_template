@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NotificationType {
+  LIKE
+  REPOST
+  REPLY
+  FOLLOW
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  displayName  String
+  email        String   @unique
+  passwordHash String
+  bio          String?
+  avatarUrl    String?
+  coverUrl     String?
+  createdAt    DateTime @default(now())
+
+  posts                   Post[]
+  likes                   Like[]
+  reposts                 Repost[]
+  bookmarks               Bookmark[]
+  followers               Follow[]        @relation("Following")
+  following               Follow[]        @relation("Follower")
+  notificationsReceived   Notification[]  @relation("NotificationRecipient")
+  notificationsIssued     Notification[]  @relation("NotificationIssuer")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  content   String
+  mediaUrls String[]
+  authorId  String
+  parentId  String?
+  createdAt DateTime @default(now())
+
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent        Post?          @relation("Thread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies       Post[]         @relation("Thread")
+  likes         Like[]
+  reposts       Repost[]
+  bookmarks     Bookmark[]
+  notifications Notification[]
+  hashtags      PostHashtag[]
+
+  @@index([authorId, createdAt(sort: Desc)])
+  @@index([parentId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+model Like {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@index([postId])
+}
+
+model Repost {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@index([postId])
+}
+
+model Bookmark {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  issuerId    String
+  type        NotificationType
+  postId      String?
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  issuer    User  @relation("NotificationIssuer", fields: [issuerId], references: [id], onDelete: Cascade)
+  post      Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, createdAt(sort: Desc)])
+  @@index([recipientId, read])
+}
+
+model Hashtag {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  createdAt DateTime      @default(now())
+  posts     PostHashtag[]
+
+  @@index([name])
+}
+
+model PostHashtag {
+  postId    String
+  hashtagId String
+
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  hashtag Hashtag @relation(fields: [hashtagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, hashtagId])
+  @@index([hashtagId])
+}
