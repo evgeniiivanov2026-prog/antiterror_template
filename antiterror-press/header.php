@@ -23,6 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) theme = "dark";
 		} catch (e) {}
 		document.documentElement.setAttribute("data-theme", theme);
+		try {
+			if (!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+				document.documentElement.setAttribute("data-motion", "on");
+			}
+		} catch (err) {}
 		var meta = document.querySelector("[data-theme-color]");
 		if (meta) meta.setAttribute("content", theme === "dark" ? "#141311" : "#f3efe6");
 	})();

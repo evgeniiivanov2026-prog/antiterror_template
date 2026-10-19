@@ -57,10 +57,14 @@ function at_assets() {
 		// no map deps
 	}
 	wp_enqueue_script( 'at-theme', get_template_directory_uri() . '/assets/js/theme.js', $theme_deps, filemtime( $js_path ), true );
+	$motion_css   = get_template_directory() . '/assets/css/motion.css';
+	$motion_js    = get_template_directory() . '/assets/js/motion.js';
 	$interact_css = get_template_directory() . '/assets/css/interact.css';
 	$interact_js  = get_template_directory() . '/assets/js/interact.js';
-	wp_enqueue_style( 'at-interact', get_template_directory_uri() . '/assets/css/interact.css', array( 'at-theme' ), filemtime( $interact_css ) );
-	wp_enqueue_script( 'at-interact', get_template_directory_uri() . '/assets/js/interact.js', array(), filemtime( $interact_js ), true );
+	wp_enqueue_style( 'at-motion', get_template_directory_uri() . '/assets/css/motion.css', array( 'at-theme' ), filemtime( $motion_css ) );
+	wp_enqueue_script( 'at-motion', get_template_directory_uri() . '/assets/js/motion.js', array(), filemtime( $motion_js ), true );
+	wp_enqueue_style( 'at-interact', get_template_directory_uri() . '/assets/css/interact.css', array( 'at-motion' ), filemtime( $interact_css ) );
+	wp_enqueue_script( 'at-interact', get_template_directory_uri() . '/assets/js/interact.js', array( 'at-motion' ), filemtime( $interact_js ), true );
 	wp_localize_script(
 		'at-interact',
 		'atInteract',

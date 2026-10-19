@@ -321,8 +321,23 @@ function at_view_is_limited() {
 /**
  * Prefetch in-site stories on hover, and skip the admin.
  */
+/**
+ * The customizer redraws the preview while controls move.
+ * Named view transitions fight that redraw, so the preview stays quiet.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function at_motion_body_class( $classes ) {
+	if ( is_customize_preview() ) {
+		$classes[] = 'at-quiet';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'at_motion_body_class' );
+
 function at_script_strategy() {
-	foreach ( array( 'at-theme', 'at-interact' ) as $handle ) {
+	foreach ( array( 'at-motion', 'at-theme', 'at-interact' ) as $handle ) {
 		wp_script_add_data( $handle, 'strategy', 'defer' );
 	}
 }

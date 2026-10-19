@@ -18,6 +18,16 @@ The contact handler is shared (`at_contact_send`): sanitize, honeypot, consent, 
 
 Scroll reveals follow the section rhythm of the paper layout and stay off when `prefers-reduced-motion` is set.
 
+## 1.14
+
+Motion is a WordPress front-end layer, not a page-builder effect.
+
+- `assets/css/motion.css` and `assets/js/motion.js` are registered in `wp_enqueue_scripts` as `at-motion`. The stylesheet is render-blocking and loads after `theme.css`. The script is deferred and is a dependency of `at-interact`, so `window.atMotion` exists before search and the feed run.
+- The inline script in `header.php` sets `data-motion="on"` before first paint, and removes it when the visitor asks for reduced motion. `theme.css` then stops every animation.
+- The first screen only translates, so the lead story stays paintable. Blocks further down fade in once, through `IntersectionObserver`.
+- Replacing the journal list calls `document.startViewTransition()` around the HTML returned by `at/v1/feed`. Appending a page fades the new rows. Search results use the same enter helper.
+- Cross-document View Transitions keep the logo (`view-transition-name: at-brand`) stable between WordPress templates. The customizer adds `at-quiet` so those names do not fight the preview iframe. `body.admin-bar` lifts the toast and the back-to-top button.
+
 ## 1.13
 
 Patterns taken from the Redsign Media news template, without its jQuery plugins: a CSS trending rail, share links, previous and next stories, reading time, and an RSS enclosure with a non-adult rating. Search results and previews are `noindex`. Schema, Open Graph, and archive lists were tightened. View counting now requires the REST nonce and an hourly cap. Public user routes, XML-RPC, and pingbacks are closed. Response headers set `nosniff`, a referrer policy, `SAMEORIGIN`, and HSTS on HTTPS.

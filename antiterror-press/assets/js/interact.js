@@ -20,25 +20,16 @@
     };
   }
 
-  function reveal(nodes) {
-    if (reduceMotion || !("IntersectionObserver" in window)) return;
-    var list = Array.prototype.slice.call(nodes || []);
-    if (!list.length) return;
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-in");
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0, rootMargin: "0px 0px -40px 0px" });
-    list.forEach(function (node) {
-      if (node.hasAttribute("data-reveal")) return;
-      node.setAttribute("data-reveal", "");
-      observer.observe(node);
+  function reveal(nodes, mode) {
+    if (window.atMotion) {
+      window.atMotion.enter(nodes, { mode: mode || "rise" });
+      return;
+    }
+    if (reduceMotion) return;
+    Array.prototype.forEach.call(nodes || [], function (node) {
+      node.classList.add("is-in");
     });
   }
-
-  reveal(document.querySelectorAll(".lead, .section, .bpla-section, .vehi-home, .band, .contest, .page-hero, .notice, .home-shelf, .rail__block"));
 
   document.querySelectorAll("[data-tabs]").forEach(function (root) {
     var tabs = Array.prototype.slice.call(root.querySelectorAll("[role='tab']"));
@@ -129,6 +120,7 @@
       searchLive.appendChild(all);
     }
     searchLive.hidden = false;
+    reveal(searchLive.querySelectorAll("li"), "rise");
   }
 
   function runSearch(query) {
@@ -254,12 +246,17 @@
       }).then(function (payload) {
         if (ticket !== feedSeq) return;
         var html = payload && typeof payload.html === "string" ? payload.html : "";
-        if (mode === "replace") list.innerHTML = html;
-        else if (html) list.insertAdjacentHTML("beforeend", html);
+        var paint = function () {
+          if (mode === "replace") list.innerHTML = html;
+          else if (html) list.insertAdjacentHTML("beforeend", html);
+        };
+        if (mode === "replace" && window.atMotion) window.atMotion.swap(paint);
+        else paint();
         if (empty) empty.hidden = list.children.length !== 0;
         paintMore(payload.page || page, payload.pages || 0);
         setStatus("", false);
-        reveal(list.querySelectorAll(".row"));
+        if (mode === "append") reveal(list.querySelectorAll(".row:not(.is-in)"), "rise");
+        else list.querySelectorAll(".row").forEach(function (row) { row.classList.add("is-in"); });
       }).catch(function (error) {
         if (error && error.name === "AbortError") return;
         if (ticket !== feedSeq) return;

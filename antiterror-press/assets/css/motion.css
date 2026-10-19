@@ -1,0 +1,165 @@
+/*
+ * Motion layer for the front end.
+ *
+ * WordPress prints this file from wp_enqueue_scripts(), after theme.css
+ * and before interact.css. It is render-blocking on purpose: the first
+ * frame already has the timing tokens. Scripts stay deferred.
+ *
+ * Opacity stays at 1 on the first screen so the lead story can paint.
+ * Later blocks fade in only after motion.js marks them.
+ * prefers-reduced-motion is handled in theme.css with animation: none.
+ */
+
+:root {
+  --at-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --at-ease-in: cubic-bezier(0.5, 0, 0.7, 0.2);
+  --at-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --at-dur-xs: 120ms;
+  --at-dur-s: 220ms;
+  --at-dur-m: 460ms;
+  --at-dur-l: 680ms;
+  --at-lift: -3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .brand { view-transition-name: at-brand; }
+  [data-feed-list] { view-transition-name: at-feed; }
+
+  ::view-transition-old(root) {
+    animation: var(--at-dur-s) var(--at-ease-in) both at-vt-out;
+  }
+  ::view-transition-new(root) {
+    animation: var(--at-dur-m) var(--at-ease-out) both at-vt-in;
+  }
+  ::view-transition-group(at-brand),
+  ::view-transition-group(at-feed) {
+    animation-duration: var(--at-dur-m);
+    animation-timing-function: var(--at-ease-out);
+  }
+
+  .at-settle {
+    animation: at-settle var(--at-dur-m) var(--at-ease-out) backwards;
+    animation-delay: var(--at-delay, 0ms);
+  }
+  .at-enter:not(.is-in) {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .at-enter.is-in {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--at-dur-m) var(--at-ease-out) var(--at-delay, 0ms),
+      transform var(--at-dur-l) var(--at-ease-out) var(--at-delay, 0ms);
+  }
+
+  html.has-js .at-tabs__panel.is-on {
+    animation: at-vt-in var(--at-dur-m) var(--at-ease-out);
+  }
+
+  .search-layer:not([hidden]) .search-panel {
+    animation: at-pop var(--at-dur-m) var(--at-ease-out) backwards;
+  }
+  .contact-dialog[open]::backdrop {
+    animation: at-fade var(--at-dur-s) linear;
+  }
+  .contact-dialog[open] .contact-dialog__panel {
+    animation: at-pop var(--at-dur-m) var(--at-ease-out) backwards;
+  }
+  .toast:not([hidden]) {
+    animation: at-toast var(--at-dur-s) var(--at-ease-out) backwards;
+  }
+  .to-top:not([hidden]) {
+    animation: at-pop var(--at-dur-s) var(--at-ease-out) backwards;
+  }
+
+  .btn,
+  .share__link,
+  .at-tabs__tab,
+  .bpla-filter,
+  .to-top,
+  .nav-links a,
+  .page-numbers {
+    transition:
+      transform var(--at-dur-xs) var(--at-ease-standard),
+      background-color var(--at-dur-s) linear,
+      color var(--at-dur-s) linear,
+      border-color var(--at-dur-s) linear;
+  }
+  .btn:active,
+  .share__link:active,
+  .at-tabs__tab:active,
+  .bpla-filter:active,
+  .to-top:active {
+    transform: scale(0.98);
+  }
+
+  .mast {
+    transition: box-shadow var(--at-dur-s) linear;
+  }
+  .progress span {
+    transition: transform var(--at-dur-xs) linear;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .story,
+  .person-card,
+  .side-story,
+  .siblings__link,
+  .row {
+    transition:
+      transform var(--at-dur-m) var(--at-ease-out),
+      border-color var(--at-dur-s) linear,
+      background-color var(--at-dur-s) linear;
+  }
+  .story:hover,
+  .person-card:hover,
+  .side-story:hover,
+  .siblings__link:hover,
+  .row:hover {
+    transform: translateY(var(--at-lift));
+  }
+  .nav a,
+  .ticker a,
+  .article__tags a {
+    transition: color var(--at-dur-s) var(--at-ease-standard);
+  }
+}
+
+body.at-quiet .brand,
+body.at-quiet [data-feed-list] {
+  view-transition-name: none;
+}
+
+body.admin-bar .to-top { bottom: 50px; }
+body.admin-bar .toast { bottom: 54px; }
+
+@media (max-width: 782px) {
+  body.admin-bar .to-top { bottom: 66px; }
+  body.admin-bar .toast { bottom: 70px; }
+}
+
+@keyframes at-settle {
+  from { transform: translateY(12px); }
+  to { transform: none; }
+}
+@keyframes at-vt-out {
+  to { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes at-vt-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes at-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes at-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes at-toast {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%); }
+}
